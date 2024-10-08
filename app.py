@@ -1,3 +1,4 @@
+# File: app.py
 import streamlit as st
 from chat import setup_rag_chain
 from pinecone import Pinecone, ServerlessSpec  # Updated import
@@ -11,10 +12,14 @@ PINECONE_ENVIRONMENT = st.secrets["PINECONE_ENVIRONMENT"]  # Add your Pinecone e
 pc = Pinecone(api_key=PINECONE_API_KEY)  # Initialize Pinecone instance
 
 # Optional: If you need to specify an environment, use the ServerlessSpec
-# Replace 'my_index' and dimensions as necessary
+# Replace 'myindex5' and dimensions as necessary
 if 'myindex5' not in pc.list_indexes().names():  # Check if the index exists
-    pc.create_index(name='myindex5', dimension=384, metric='cosine', 
-                    spec=ServerlessSpec(cloud='aws', region='us-east-1'))  # Create an index if it doesn't exist
+    pc.create_index(
+        name='myindex5',
+        dimension=384,
+        metric='cosine',
+        spec=ServerlessSpec(cloud='aws', region='us-east-1')
+    )  # Create an index if it doesn't exist
 
 # Setup RAG Chain
 rag_chain, memory = setup_rag_chain()
@@ -32,12 +37,13 @@ st.markdown("""
     <style>
     body {
         font-family: 'Arial', sans-serif;
+        background-color: #f0f2f6;
     }
     .chat-container {
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
-        background-color: #f9f9f9;
+        background-color: #ffffff;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
@@ -99,18 +105,19 @@ def display_chat():
 
 # Input form
 with st.form(key='chat_form', clear_on_submit=True):
-    user_input = st.text_input("You:", key='input_text')
+    user_input = st.text_input("You:", key='user_input')  # Changed key to 'user_input' to avoid conflict
     submit_button = st.form_submit_button(label='Send')
 
 if submit_button and user_input:
     # Append user message to history
     st.session_state.history.append({'role': 'user', 'content': user_input})
 
-    # Generate response using the RAG chain
-    try:
-        response = rag_chain.invoke(user_input)
-    except Exception as e:
-        response = "I'm sorry, something went wrong while processing your request."
+    # Generate response using the RAG chain with a loading spinner
+    with st.spinner('🔮 Fortune Teller is thinking...'):
+        try:
+            response = rag_chain.invoke(user_input)
+        except Exception as e:
+            response = "I'm sorry, something went wrong while processing your request."
 
     # Append bot response to history
     st.session_state.history.append({'role': 'bot', 'content': response})
@@ -118,8 +125,7 @@ if submit_button and user_input:
     # Save the interaction to memory
     memory.save_context({"input": user_input}, {"output": response})
 
-    # Clear the input field manually by setting the session state
-    st.session_state.input_text = ""
+    # Note: No need to manually clear the input field since `clear_on_submit=True` handles it
 
 # Display the chat log within a scrollable container
 st.markdown('<div class="chat-log">', unsafe_allow_html=True)
