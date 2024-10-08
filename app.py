@@ -1,4 +1,3 @@
-# File: app.py
 import streamlit as st
 from chat import setup_rag_chain
 from pinecone import Pinecone, ServerlessSpec  # Updated import
@@ -100,7 +99,7 @@ def display_chat():
 
 # Input form
 with st.form(key='chat_form', clear_on_submit=True):
-    user_input = st.text_input("You:", "")
+    user_input = st.text_input("You:", key='input_text')
     submit_button = st.form_submit_button(label='Send')
 
 if submit_button and user_input:
@@ -119,10 +118,10 @@ if submit_button and user_input:
     # Save the interaction to memory
     memory.save_context({"input": user_input}, {"output": response})
 
-    # Refresh the chat display
-    st.experimental_rerun()
+    # Clear the input field manually by setting the session state
+    st.session_state.input_text = ""
 
-# Display the chat log
+# Display the chat log within a scrollable container
 st.markdown('<div class="chat-log">', unsafe_allow_html=True)
 display_chat()
 st.markdown('</div>', unsafe_allow_html=True)
@@ -130,4 +129,5 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Exit button to clear chat history
 if st.button('Exit'):
     st.session_state.history = []
-    st.experimental_rerun()
+    # Optionally, you can display a message confirming the chat history is cleared
+    st.success("Chat history has been cleared.")
