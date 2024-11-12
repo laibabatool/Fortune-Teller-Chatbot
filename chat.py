@@ -39,7 +39,8 @@ def setup_rag_chain():
     # Define the prompt template
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are a friendly and knowledgeable fortune teller. Use the information provided in the context and past conversation to answer the user's question. If you're unsure, it's okay to say you don't know. Keep your response short, warm, and easy to understand."),
-        ("human", "Context: {context}\n\nConversation History: {history}\n\nQuestion: {question}\n\nAnswer:"),
+        
+        
     ])
 
     # Define an output parser to clean the LLM's response
